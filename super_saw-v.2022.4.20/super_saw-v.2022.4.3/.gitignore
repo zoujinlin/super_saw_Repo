@@ -1,0 +1,9 @@
+sandbox
+.DS_Store
+__pycache__
+build
+dist
+env
+.env
+*.pyc
+data

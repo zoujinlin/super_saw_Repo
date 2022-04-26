@@ -1,0 +1,30 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="3">
+            <item index="0" class="java.lang.String" itemvalue="tensorflow" />
+            <item index="1" class="java.lang.String" itemvalue="tf-nightly-gpu" />
+            <item index="2" class="java.lang.String" itemvalue="tf-nightly" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="injection.gtsrb_injection_example.injection_utils" />
+          <option value="injection.gtsrb_injection_example.construct_mask_box" />
+          <option value="injection.gtsrb_injection_example.BackdoorCall" />
+          <option value="tensorflow_core._api.v2.compat.v1.keras" />
+          <option value="tensorflow_model_optimization.sparsity" />
+          <option value="PyQt5.QtWidgets" />
+          <option value="PyQt5.QtCore" />
+          <option value="PyQt5.QtGui" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

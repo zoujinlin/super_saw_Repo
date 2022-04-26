@@ -1,0 +1,1 @@
+pyinstaller --onefile --windowed --add-data="logo_343x60.png;." --hidden-import="sklearn.utils._typedefs" saw_single.py

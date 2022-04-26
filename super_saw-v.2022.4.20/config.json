@@ -1,0 +1,10 @@
+{
+    "start_freq": 428,
+    "stop_freq": 429,
+    "threshold": 14000,
+    "thresholdRange": 3000,
+    "freqRange": 0.5,
+    "intercept": 2281472.055,
+    "slope_1": -0.0107016075,
+    "slope_2": 1.25492074e-11
+}
