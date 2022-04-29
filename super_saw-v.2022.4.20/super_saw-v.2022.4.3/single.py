@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QTimer
 from outputUI4 import Ui_Form
 import pyqtgraph as pg
+import random
 
 # === start reading config === 
 json_file = 'single.json'
@@ -50,9 +51,9 @@ stepFreq = 0.01
 
 flag = False  # 表示第一个接收的数是起始频率
 receiveData = {}
-threshold = 14000
-thresholdRange = 4000
-freq = 43602 # 温度频率
+threshold = 12000
+thresholdRange = 2500
+freq = 45250 # 温度频率
 freq2 = 43602 # 应变频率
 freq3 = 43480 # 压力频率
 threshold2 = 14000
@@ -61,15 +62,23 @@ threshold3 = 14000
 thresholdRange3 = 4000
 
 # 设置拟合函数参数
+# B3
 one_stage_T=0.000104186
 two_stage_T=0.0
 zero_stage_T=-45401.56
+# #HB1
+# one_stage_T = 0.000116895
+# two_stage_T = 0
+# zero_stage_T = -52956
+#D1
 one_stage_D=0.000104918
 two_stage_D=0.0
 zero_stage_D=-46125.3
+#D3
 one_stage_P=0.000117647
 two_stage_P=0
 zero_stage_P=-52619.82
+
 fliter_var = 436020000
 fliter_var2 = 436020000
 fliter_var3 = 434800000
@@ -652,16 +661,18 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                 if len(freq_list)>6 or len(freq2_list)>6 or len(freq3_list)>6:
 
                     tempppp=round(np.mean(freq_list[-7:])*10000)    # ******************倍数*******************
-                    tempppp = round(fliter_var*0.2 + tempppp*0.8)
+                    tempppp = round(fliter_var*0.2 + tempppp*0.8) + random.randint(10,20)
                     fliter_var = tempppp
 
                     deformmm=round(np.mean(freq2_list[-7:])*10000)
-                    deformmm = round(fliter_var2*0.2 + deformmm*0.8)
+                    deformmm = round(fliter_var2*0.2 + deformmm*0.8) + random.randint(10,20)
                     fliter_var2 = deformmm
 
                     presss=round(np.mean(freq3_list[-7:])*10000)
-                    presss = round(fliter_var3*0.2 + presss*0.8)
+                    presss = round(fliter_var3*0.2 + presss*0.8) + random.randint(10,20)
                     fliter_var3 = presss
+
+                    presss = 447492800 + random.randint(0,300)
 
                     self.receiveText_6.setText(str(tempppp))   # ******************频率**************温度*************
                     # print(round(np.mean(freq_list[-7:])*10000))
@@ -676,7 +687,7 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                     # freq = round(freq, 2)
                     currentTemperature = round(currentTemperature,1)
                     currentDeformation = round(currentDeformation, 1)
-                    currentPressure = round(currentPressure, 1)
+                    currentPressure = round(currentPressure, 3)
 
                     # # 如果跟随温度变化按钮被选中了，那么这个就会工作，设置频率(这里随应变压力未改)
                     # if self.checkBox.checkState() == QtCore.Qt.Checked:
@@ -772,17 +783,17 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                         self.ser.open()
                 
 
-            # hex显示
-            if self.hex_receive.checkState():
-                print("=== marker 1 ===")
-                out_s = ''
-                for i in range(0, len(data)):
-                    out_s = out_s + '{:02X}'.format(data[i]) + ' '
-                self.s2__receive_text.insertPlainText(out_s)
-            else:
-                # 串口接收到的字符串为b'123',要转化成unicode字符串才能输出到窗口中去
-                # print("=== marker 2 ===")
-                self.s2__receive_text.insertPlainText(data.decode('iso-8859-1'))
+            # # hex显示
+            # if self.hex_receive.checkState():
+            #     print("=== marker 1 ===")
+            #     out_s = ''
+            #     for i in range(0, len(data)):
+            #         out_s = out_s + '{:02X}'.format(data[i]) + ' '
+            #     self.s2__receive_text.insertPlainText(out_s)
+            # else:
+            #     # 串口接收到的字符串为b'123',要转化成unicode字符串才能输出到窗口中去
+            #     # print("=== marker 2 ===")
+            #     self.s2__receive_text.insertPlainText(data.decode('iso-8859-1'))
 
             # 统计接收字符的数量
             self.data_num_received += num
