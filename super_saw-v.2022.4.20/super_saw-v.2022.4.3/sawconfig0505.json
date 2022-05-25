@@ -1,0 +1,13 @@
+{
+    "start_freq": 453,
+    "stop_freq": 454,
+    "one_stage_T": 0.000116895,
+    "two_stage_T": 0.0,
+    "zero_stage_T": -52956.0,
+    "one_stage_D": 0.000104918,
+    "two_stage_D": 0.0,
+    "zero_stage_D": -45616.3,
+    "one_stage_P": -1.41019e-05,
+    "two_stage_P": 0.0,
+    "zero_stage_P": 6131.754
+}

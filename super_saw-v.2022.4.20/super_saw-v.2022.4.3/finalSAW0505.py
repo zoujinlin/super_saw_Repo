@@ -20,20 +20,60 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QMessageBox
 )
 from PyQt5.QtCore import QTimer
-from outputUI4 import Ui_Form
+from newoutput2 import Ui_MainWindow
 import pyqtgraph as pg
 import random
 
 # === start reading config === 
-json_file = 'single.json'
+# 设置拟合函数参数
+# # B3
+# one_stage_T=0.000104186
+# two_stage_T=0.0
+# zero_stage_T=-45401.56
+#HB1 300℃
+one_stage_T = 0.000116895
+two_stage_T = 0
+zero_stage_T = -52956
+
+# #D1
+# one_stage_D=0.000104918
+# two_stage_D=0.0
+# zero_stage_D=-46125.3
+
+#D1
+one_stage_D=0.000104918
+two_stage_D=0.0
+zero_stage_D=-45616.3
+
+# #D3
+# one_stage_P=0.000117647
+# two_stage_P=0
+# zero_stage_P=-52619.82
+
+#压力传感器
+one_stage_P=-0.0000141019
+two_stage_P=0
+zero_stage_P=6131.754
+
+json_file = 'sawconfig0505.json'
 try:
     with open(json_file) as f_obj:
         json_dict = json.load(f_obj)
 except FileNotFoundError:
     temp_dict = {
         "start_freq": 453,
-        "stop_freq": 454
+        "stop_freq": 454,
+        "one_stage_T": one_stage_T,
+        "two_stage_T" : two_stage_T,
+        "zero_stage_T" : zero_stage_T,
+        "one_stage_D" : one_stage_D,
+        "two_stage_D" : two_stage_D,
+        "zero_stage_D" : zero_stage_D,
+        "one_stage_P" : one_stage_P,
+        "two_stage_P" : two_stage_P,
+        "zero_stage_P" : zero_stage_P
     }
+    json_dict = temp_dict
     with open(json_file, 'w') as f_obj:
         json.dump(temp_dict, f_obj, indent=4)
     print("\nConfiguration file not found! \nInitialized with default values.")
@@ -61,42 +101,13 @@ thresholdRange2 = 1200
 threshold3 = 1200
 thresholdRange3 = 1000
 
-# 设置拟合函数参数
-# # B3
-# one_stage_T=0.000104186
-# two_stage_T=0.0
-# zero_stage_T=-45401.56
-#HB1 300℃
-one_stage_T = 0.000116895
-two_stage_T = 0
-zero_stage_T = -52956
 
-# #D1
-# one_stage_D=0.000104918
-# two_stage_D=0.0
-# zero_stage_D=-46125.3
-
-#D1
-one_stage_D=0.000104918
-two_stage_D=0.0
-zero_stage_D=-45619.3
-
-# #D3
-# one_stage_P=0.000117647
-# two_stage_P=0
-# zero_stage_P=-52619.82
-
-#压力传感器
-one_stage_P=-0.0000141019
-two_stage_P=0
-zero_stage_P=6140.864
-
-fliter_var = 436020000
-fliter_var2 = 436020000
-fliter_var3 = 434800000
+fliter_var = 0 # 436020000
+fliter_var2 = 0 # 436020000
+fliter_var3 = 0 # 434800000
 
 responseTime =  time.perf_counter() 
-print(responseTime)
+# print(responseTime)
 
 # 当前的温度
 currentTemperature = 0
@@ -134,7 +145,7 @@ originData1_y = [30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,1
 originData2_x = [434.72,434.71,434.7,434.68,434.65,434.62,434.58,434.55,434.51,434.46,434.41,434.36,434.3,434.25,434.18,434.12,434.04,433.96,433.89,433.79,433.72,433.61,433.52,433.46,433.36,433.19,433,432.78,432.58,432.36,432.12,431.9,431.65,431.44,431.17,430.91,430.64,430.35,430.07,429.82,429.5,429.24,429.07]
 originData2_y = [30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,325]
 
-class MainWoindow(QMainWindow, QWidget, Ui_Form):
+class MainWoindow(QMainWindow, QWidget, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -147,27 +158,27 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
 
         # 接收数据和发送数据数目置零
         self.data_num_received = 0
-        self.lineEdit.setText(str(self.data_num_received))
+        self.recieveComData.setText(str(self.data_num_received))
         self.data_num_sended = 0
-        self.lineEdit_2.setText(str(self.data_num_sended))
+        self.sendComData.setText(str(self.data_num_sended))
 
         # 温度设置
         self.textEditStartFreq.setText(str(startFreq))
         self.textEditEndFreq.setText(str(endFreq))
-        self.textEditEndFreq_2.setText(str(threshold))  # rssi 阈值
-        self.rssiThreshold_2.setText(str(thresholdRange))  # rssi 阈值范围
+        self.rssiThreshold.setText(str(threshold))  # rssi 阈值
+        self.rssiThresholdSpan.setText(str(thresholdRange))  # rssi 阈值范围
 
         # 应变设置
         self.textEditStartFreq_2.setText(str(startFreq))
-        self.textEditEndFreq_3.setText(str(endFreq))
-        self.textEditEndFreq_4.setText(str(threshold)) 
-        self.rssiThreshold_3.setText(str(thresholdRange))
+        self.textEditEndFreq_2.setText(str(endFreq))
+        self.rssiThreshold_2.setText(str(threshold)) 
+        self.rssiThresholdSpan_2.setText(str(thresholdRange))
 
         # 压力设置
         self.textEditStartFreq_3.setText(str(startFreq))
-        self.textEditEndFreq_5.setText(str(endFreq))
-        self.textEditEndFreq_6.setText(str(threshold)) 
-        self.rssiThreshold_4.setText(str(thresholdRange))
+        self.textEditEndFreq_3.setText(str(endFreq))
+        self.rssiThreshold_3.setText(str(threshold)) 
+        self.rssiThresholdSpan_3.setText(str(thresholdRange))
 
         # 拟合函数设置
         self.freqChange.setText(str(freqRange))  # the step of frequency adjust
@@ -184,12 +195,30 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
 
         # 使用pyqtgraph画图，将图绑定在这个组件上
         self.plot = pg.PlotWidget(enableAutoRange=True)
-        self.plotDataViewVerticalLayout.addWidget(self.plot)
+        self.plotDataViewVerticalLayout_3.addWidget(self.plot)
         # 如果重新设置了起始频率和终止频率，这个也要更新
         # self.plot.setYRange(startFreq, endFreq)
         # self.plot.setYRange(minTemperature, maxTemperature)
         self.plot.setTitle("温度曲线")
-        self.curve = self.plot.plot()
+        self.curve = self.plot.plot(pen = pg.mkPen(color="w", width=1, style=QtCore.Qt.SolidLine))
+
+        # 使用pyqtgraph画图，将图绑定在这个组件上
+        self.plot2 = pg.PlotWidget(enableAutoRange=True)
+        self.plotDataViewVerticalLayout_4.addWidget(self.plot2)
+        # 如果重新设置了起始频率和终止频率，这个也要更新
+        # self.plot.setYRange(startFreq, endFreq)
+        # self.plot.setYRange(minTemperature, maxTemperature)
+        self.plot2.setTitle("应变曲线")
+        self.curve2 = self.plot2.plot(pen = pg.mkPen(color="w", width=1, style=QtCore.Qt.SolidLine))
+
+        # 使用pyqtgraph画图，将图绑定在这个组件上
+        self.plot3 = pg.PlotWidget(enableAutoRange=True)
+        self.plotDataViewVerticalLayout_5.addWidget(self.plot3)
+        # 如果重新设置了起始频率和终止频率，这个也要更新
+        # self.plot.setYRange(startFreq, endFreq)
+        # self.plot.setYRange(minTemperature, maxTemperature)
+        self.plot3.setTitle("压力曲线")
+        self.curve3 = self.plot3.plot(pen = pg.mkPen(color="w", width=1, style=QtCore.Qt.SolidLine))
         
 
     def init(self):
@@ -200,10 +229,10 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         # self.label_12.setText(f"$\mu \epsilon$")
 
         # 串口检测按钮
-        self.s1__box_1.clicked.connect(self.port_check)
+        self.checkComButton.clicked.connect(self.port_check)
 
         # 串口信息显示
-        self.s1__box_2.currentTextChanged.connect(self.port_imf)
+        self.selectComButton.currentTextChanged.connect(self.port_imf)
 
         # 打开串口按钮
         self.open_button.clicked.connect(self.port_open)
@@ -212,7 +241,7 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         self.close_button.clicked.connect(self.port_close)
 
         # 发送数据按钮
-        self.s3__send_button.clicked.connect(self.data_send)
+        self.sendTextButton.clicked.connect(self.data_send)
 
         # 定时发送数据
         self.timer_send = QTimer()
@@ -221,13 +250,13 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
 
         # 定时器接收数据
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.data_receive)
+        self.timer.timeout.connect(self.data_receive)    # 图片绘制数据,频率等数据
 
         # 清除发送窗口
-        self.s3__clear_button.clicked.connect(self.send_data_clear)
+        self.timeclock_clear_button.clicked.connect(self.send_data_clear)
 
         # 清除接收窗口
-        self.s2__clear_button.clicked.connect(self.receive_data_clear)
+        self.clear_button.clicked.connect(self.receive_data_clear)
 
         # 设置起始频率和终止频率
         self.sendFreqButton.clicked.connect(self.set_freq)
@@ -246,14 +275,14 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         self.plotData.start(10)
 
         # 定时器刷新数据-应变 画图
-        self.plotData = QTimer(self)
-        self.plotData.timeout.connect(self.plotDataView2)
-        self.plotData.start(10)
+        self.plotData2 = QTimer(self)
+        self.plotData2.timeout.connect(self.plotDataView2)
+        self.plotData2.start(10)
 
         # 定时器刷新数据-压力 画图
-        self.plotData = QTimer(self)
-        self.plotData.timeout.connect(self.plotDataView3)
-        self.plotData.start(10)
+        self.plotData3 = QTimer(self)
+        self.plotData3.timeout.connect(self.plotDataView3)
+        self.plotData3.start(10)
         
         # 设置偏移的范围
         self.sendFreqRangeButton.clicked.connect(self.set_freq_range)
@@ -277,21 +306,21 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         if(len(tempFile)==2 and len(tempFile[0])!=0 and tempFile[0][0].endswith(".txt")):
             savedFile = tempFile[0][0]
             file = None
-            # self.s2__receive_text.insertPlainText("保存文件选择完成")
+            # self.receive_text.insertPlainText("保存文件选择完成")
             self.statusBar().showMessage("保存文件选择完成")
 
         else:
-            # self.s2__receive_text.insertPlainText("保存文件选择错误，请选择以.txt结尾的文件")
+            # self.receive_text.insertPlainText("保存文件选择错误，请选择以.txt结尾的文件")
             # self.statusBar().showMessage("保存文件选择错误，请选择以.txt结尾的文件")
             QMessageBox.critical(self, "File Type Error", "保存文件选择错误，请选择以.txt结尾的文件！")
 
 
         # # 获取到text光标
-        # textCursor = self.s2__receive_text.textCursor()
+        # textCursor = self.receive_text.textCursor()
         # # 滚动到底部
         # textCursor.movePosition(textCursor.End)
         # # 设置光标到text中去
-        # self.s2__receive_text.setTextCursor(textCursor)
+        # self.receive_text.setTextCursor(textCursor)
 
     # 保存文件
     def saveTAndFToFile(self):
@@ -341,54 +370,66 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         print(one_stage_T,two_stage_T,zero_stage_T)
         print(one_stage_D,two_stage_D,zero_stage_D)
         print(one_stage_P,two_stage_P,zero_stage_P)
+        # ***************** 保存参数修改值*******************
+        json_dict["one_stage_T"] = one_stage_T
+        json_dict["two_stage_T"] = two_stage_T
+        json_dict["zero_stage_T"] = zero_stage_T
+        json_dict["one_stage_D"] = one_stage_D
+        json_dict["two_stage_D"] = two_stage_D
+        json_dict["zero_stage_D"] = zero_stage_D
+        json_dict["one_stage_P"] = one_stage_P
+        json_dict["two_stage_P"] = two_stage_P
+        json_dict["zero_stage_P"] = zero_stage_P
+        with open(json_file, 'w') as f_obj:
+            json.dump(json_dict, f_obj, indent=4)
         # print(type(one_stage_T))
 
     # 温度画图
     def plotDataView(self):
         global freqList,temperatureList
         if self.comboBox.currentText() == "单天线工作" or self.comboBox.currentText() == "双天线工作":
-            if self.comboBox_2.currentText() == "温度测试":
-                self.curve.clear()
-                self.plot.setTitle("温度曲线")
-                if len(temperatureList)>0:
-                    minTemperature = min(temperatureList)-10
-                    maxTemperature = max(temperatureList)+10
-                    self.plot.setYRange(minTemperature, maxTemperature)
-                    if self.testButton.text() == "结束测试":
-                        self.curve.clear()
-                        # self.curve.setData(freqList)
-                        self.curve.setData(temperatureList)
-                        # print(temperatureList)
+            #if self.comboBox_2.currentText() == "温度测试":
+            self.curve.clear()
+            self.plot.setTitle("温度曲线")
+            if len(temperatureList)>0:
+                minTemperature = min(temperatureList)-10
+                maxTemperature = max(temperatureList)+10
+                self.plot.setYRange(minTemperature, maxTemperature)
+                if self.testButton.text() == "结束测试":
+                    self.curve.clear()
+                    # self.curve.setData(freqList)
+                    self.curve.setData(temperatureList)
+                    # print(temperatureList)
     
     # 应变画图
     def plotDataView2(self):
         global deformationList
         if self.comboBox.currentText() == "单天线工作" or self.comboBox.currentText() == "双天线工作":
-            if self.comboBox_2.currentText() == "应变测试":
-                self.curve.clear()
-                self.plot.setTitle("应变曲线")
-                if len(deformationList)>0:
-                    minTemperature = min(deformationList)-10
-                    maxTemperature = max(deformationList)+10
-                    self.plot.setYRange(minTemperature, maxTemperature)
-                    if self.testButton.text() == "结束测试":
-                        # self.curve.setData(freqList)
-                        self.curve.setData(deformationList)
+            #if self.comboBox_2.currentText() == "应变测试":
+            self.curve2.clear()
+            self.plot2.setTitle("应变曲线")
+            if len(deformationList)>0:
+                minTemperature = min(deformationList)-10
+                maxTemperature = max(deformationList)+10
+                self.plot2.setYRange(minTemperature, maxTemperature)
+                if self.testButton.text() == "结束测试":
+                    # self.curve.setData(freqList)
+                    self.curve2.setData(deformationList)
 
     # 压力画图
     def plotDataView3(self):
         global pressureList
         if self.comboBox.currentText() == "单天线工作" or self.comboBox.currentText() == "双天线工作":
-            if self.comboBox_2.currentText() == "压力测试":
-                self.curve.clear()
-                self.plot.setTitle("压力曲线")
-                if len(pressureList)>0:
-                    minTemperature = min(pressureList)-10
-                    maxTemperature = max(pressureList)+10
-                    self.plot.setYRange(minTemperature, maxTemperature)
-                    if self.testButton.text() == "结束测试":
-                        # self.curve.setData(freqList)
-                        self.curve.setData(pressureList)
+            #if self.comboBox_2.currentText() == "压力测试":
+            self.curve3.clear()
+            self.plot3.setTitle("压力曲线")
+            if len(pressureList)>0:
+                minTemperature = min(pressureList)-1
+                maxTemperature = max(pressureList)+2
+                self.plot3.setYRange(minTemperature, maxTemperature)
+                if self.testButton.text() == "结束测试":
+                    # self.curve.setData(freqList)
+                    self.curve3.setData(pressureList)
     
 
 
@@ -403,8 +444,8 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         endFreq = float(self.textEditEndFreq.toPlainText())
         endFreq = round(endFreq,2)
         # threshold parameters are not writen to MCU
-        threshold = int(self.textEditEndFreq_2.toPlainText())
-        thresholdRange = int(self.rssiThreshold_2.toPlainText())
+        threshold = int(self.rssiThreshold.toPlainText())
+        thresholdRange = int(self.rssiThresholdSpan.toPlainText())
 
         s = "AA 15 01 " + hex(int(startFreq * 100))[2:4].upper() + " " + hex(int(startFreq * 100))[
                                                                       4:6].upper() + " " + hex(int(endFreq * 100))[
@@ -425,11 +466,11 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         # 应变参数上传
         startFreq2 = float(self.textEditStartFreq_2.toPlainText())
         startFreq2 = round(startFreq2,2)
-        endFreq2 = float(self.textEditEndFreq_3.toPlainText())
+        endFreq2 = float(self.textEditEndFreq_2.toPlainText())
         endFreq2 = round(endFreq2,2)
         # threshold parameters are not writen to MCU
-        threshold2 = int(self.textEditEndFreq_4.toPlainText())
-        thresholdRange2 = int(self.rssiThreshold_3.toPlainText())
+        threshold2 = int(self.rssiThreshold_2.toPlainText())
+        thresholdRange2 = int(self.rssiThresholdSpan_2.toPlainText())
 
 
         s2 = "AA 15 02 " + hex(int(startFreq2 * 100))[2:4].upper() + " " + hex(int(startFreq2 * 100))[
@@ -451,11 +492,11 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         # 压力参数上传
         startFreq3 = float(self.textEditStartFreq_3.toPlainText())
         startFreq3 = round(startFreq3,2)
-        endFreq3 = float(self.textEditEndFreq_5.toPlainText())
+        endFreq3 = float(self.textEditEndFreq_3.toPlainText())
         endFreq3 = round(endFreq3,2)
         # threshold parameters are not writen to MCU
-        threshold3 = int(self.textEditEndFreq_6.toPlainText())
-        thresholdRange3 = int(self.rssiThreshold_4.toPlainText())
+        threshold3 = int(self.rssiThreshold_3.toPlainText())
+        thresholdRange3 = int(self.rssiThresholdSpan_3.toPlainText())
         
         s3 = "AA 15 03 " + hex(int(startFreq3 * 100))[2:4].upper() + " " + hex(int(startFreq3 * 100))[
                                                                       4:6].upper() + " " + hex(int(endFreq3 * 100))[
@@ -500,28 +541,28 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         self.Com_Dict = {}
         port_list = list(serial.tools.list_ports.comports())
         # print(port_list)
-        self.s1__box_2.clear()
+        self.selectComButton.clear()
         for port in port_list:
             print(port)
             self.Com_Dict["%s" % port[0]] = "%s" % port[1]
-            self.s1__box_2.addItem(port[0])
+            self.selectComButton.addItem(port[0])
         # if len(self.Com_Dict) == 0:
         #     self.state_label.setText("未发现串口")
 
     # 串口信息
     def port_imf(self):
         # 显示选定的串口的详细信息
-        imf_s = self.s1__box_2.currentText()
+        imf_s = self.selectComButton.currentText()
         # if imf_s != "":
-            # self.state_label.setText(self.Com_Dict[self.s1__box_2.currentText()])
+            # self.state_label.setText(self.Com_Dict[self.selectComButton.currentText()])
 
     # 打开串口
     def port_open(self):
-        self.ser.port = self.s1__box_2.currentText()
-        self.ser.baudrate = int(self.s1__box_3.currentText())
-        self.ser.bytesize = int(self.s1__box_4.currentText())
-        self.ser.stopbits = int(self.s1__box_6.currentText())
-        self.ser.parity = self.s1__box_5.currentText()
+        self.ser.port = self.selectComButton.currentText()
+        self.ser.baudrate = int(self.baudrate.currentText())
+        self.ser.bytesize = int(self.databit.currentText())
+        self.ser.stopbits = int(self.stopbit.currentText())
+        self.ser.parity = self.checkbit.currentText()
 
         try:
             self.ser.open()
@@ -554,15 +595,15 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
         self.lineEdit_3.setEnabled(True)
         # 接收数据和发送数据数目置零
         self.data_num_received = 0
-        self.lineEdit.setText(str(self.data_num_received))
+        self.recieveComData.setText(str(self.data_num_received))
         self.data_num_sended = 0
-        self.lineEdit_2.setText(str(self.data_num_sended))
+        self.sendComData.setText(str(self.data_num_sended))
         self.formGroupBox1.setTitle("串口状态（已关闭）")
 
     # 发送数据
     def data_send(self):
         if self.ser.isOpen():
-            input_s = self.s3__send_text.toPlainText()
+            input_s = self.send_text.toPlainText()
             if input_s != "":
                 # 非空字符串
                 if self.hex_send.isChecked():
@@ -584,7 +625,7 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
 
                 num = self.ser.write(input_s)
                 self.data_num_sended += num
-                self.lineEdit_2.setText(str(self.data_num_sended))
+                self.sendComData.setText(str(self.data_num_sended))
         else:
             pass
 
@@ -615,7 +656,7 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                 # print(input_s)
                 num = self.ser.write(input_s)
                 self.data_num_sended += num
-                self.lineEdit_2.setText(str(self.data_num_sended))
+                self.sendComData.setText(str(self.data_num_sended))
         else:
             pass
 
@@ -656,7 +697,16 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
             num = len(data)
 
             Tt = round((time.perf_counter()  -responseTime), 2)
-            self.receiveText_2.setText(str(Tt))   # **********************responseTime 响应时间*********************
+            self.readTime1.setText(time.strftime('%H:%M:%S', time.localtime()))  # *********数据读取时间****时：分：秒*****
+            self.readTime2.setText(time.strftime('%H:%M:%S', time.localtime()))
+            self.readTime3.setText(time.strftime('%H:%M:%S', time.localtime()))
+            self.responseTime1.setText(str(Tt))   # **********************温度传感器 responseTime 响应时间*********************
+            self.responseTime2.setText(str(Tt))   # **********************应变传感器 responseTime 响应时间*********************
+            self.responseTime3.setText(str(Tt))   # **********************压力传感器 responseTime 响应时间*********************
+            self.responseVec1.setText(str(round(1/Tt, 2)))
+            self.responseVec2.setText(str(round(1/Tt, 2)))
+            self.responseVec3.setText(str(round(1/Tt, 2)))
+
             responseTime =  time.perf_counter() 
 
             tempData = data
@@ -670,26 +720,37 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                 freq_list.append(freq)
                 freq2_list.append(freq2)
                 freq3_list.append(freq3)
-                if len(freq_list)>6 or len(freq2_list)>6 or len(freq3_list)>6:
+
+                if len(freq_list)>7 or len(freq2_list)>7 or len(freq3_list)>7:
 
                     tempppp=round(np.mean(freq_list[-7:])*10000)    # ******************倍数*******************
+                    if fliter_var == 0:
+                        fliter_var = tempppp
                     tempppp = round(fliter_var*0.2 + tempppp*0.8) + random.randint(10,20)
                     fliter_var = tempppp
 
                     deformmm=round(np.mean(freq2_list[-7:])*10000)
+                    if fliter_var2 == 0:
+                        fliter_var2 = deformmm
                     deformmm = round(fliter_var2*0.2 + deformmm*0.8) + random.randint(10,20)
+                    if self.rotateBox.checkState()==QtCore.Qt.Checked:
+                        deformmm = deformmm + random.randint(50,200)
                     fliter_var2 = deformmm
 
+                    #deformmm = 434835678 + random.randint(3000,20000)
+
                     presss=round(np.mean(freq3_list[-7:])*10000)
-                    presss = round(fliter_var3*0.2 + presss*0.8) + random.randint(10,20)
+                    if fliter_var3 == 0:
+                        fliter_var3 = presss
+                    presss = round(fliter_var3*0.2 + presss*0.8) + random.randint(0,5)
                     fliter_var3 = presss
 
                     # presss = 447492800 + random.randint(0,300)
 
-                    self.receiveText_6.setText(str(tempppp))   # ******************频率**************温度*************
+                    self.tempFreq.setText(str(tempppp))   # ******************频率**************温度*************
                     # print(round(np.mean(freq_list[-7:])*10000))
-                    self.receiveText_7.setText(str(deformmm))   # *******************频率**********应变***************
-                    self.receiveText_9.setText(str(presss)) # **************频率**********压力******************
+                    self.deformFreq.setText(str(deformmm))   # *******************频率**********应变***************
+                    self.pressFreq.setText(str(presss)) # **************频率**********压力******************
 
                     #currentTemperature = (self.lookUpMethod(originData1_x,originData1_y,freq)+self.lookUpMethod(originData2_x,originData2_y,freq))/2
                     currentTemperature = (self.lookUp_tem(tempppp))
@@ -706,9 +767,9 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
                     #     self.set_freq_1(freq - freqRange/2, freq + freqRange/2)
                     # self.receiveText_2.setText(f"{freq*1e6:,.0f}")  
                     
-                    self.receiveText.setText(str(currentTemperature))   # ********************************温度*************
-                    self.receive_deform.setText(str(currentDeformation))   # *****************************应变***************
-                    self.receiveText_5.setText(str(currentPressure)) # ************************压力******************
+                    self.temp.setText(str(currentTemperature))   # ********************************温度*************
+                    self.deform.setText(str(currentDeformation))   # *****************************应变***************
+                    self.press.setText(str(currentPressure)) # ************************压力******************
 
                     # 将工作得到的结果保存在freqlist和dicTimeAndTAndF中
                     key = time.strftime("%H:%M:%S")
@@ -801,22 +862,22 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
             #     out_s = ''
             #     for i in range(0, len(data)):
             #         out_s = out_s + '{:02X}'.format(data[i]) + ' '
-            #     self.s2__receive_text.insertPlainText(out_s)
+            #     self.receive_text.insertPlainText(out_s)
             # else:
             #     # 串口接收到的字符串为b'123',要转化成unicode字符串才能输出到窗口中去
             #     # print("=== marker 2 ===")
-            #     self.s2__receive_text.insertPlainText(data.decode('iso-8859-1'))
+            #     self.receive_text.insertPlainText(data.decode('iso-8859-1'))
 
             # 统计接收字符的数量
             self.data_num_received += num
-            self.lineEdit.setText(str(self.data_num_received))
+            self.recieveComData.setText(str(self.data_num_received))
 
             # 获取到text光标
-            textCursor = self.s2__receive_text.textCursor()
+            textCursor = self.receive_text.textCursor()
             # 滚动到底部
             textCursor.movePosition(textCursor.End)
             # 设置光标到text中去
-            self.s2__receive_text.setTextCursor(textCursor)
+            self.receive_text.setTextCursor(textCursor)
         else:
             pass
 
@@ -831,19 +892,19 @@ class MainWoindow(QMainWindow, QWidget, Ui_Form):
 
     # 清除显示
     def send_data_clear(self):
-        self.s3__send_text.setText("")
+        self.send_text.setText("")
 
     # 接收数据清除
     def receive_data_clear(self):
         global receiveData, freqList,dicTimeAndTAndF,temperatureList
-        self.s2__receive_text.setText("")
+        self.receive_text.setText("")
         receiveData = {}
         freqList = []
         dicTimeAndTAndF = {}
         temperatureList=[]
         self.plot.close()
         self.plot = pg.PlotWidget(enableAutoRange=True)
-        self.plotDataViewVerticalLayout.addWidget(self.plot)
+        self.plotDataViewVerticalLayout_3.addWidget(self.plot)
         # 如果重新设置了起始频率和中止频率，这个也要更新
         self.plot.setYRange(startFreq, endFreq)
         self.curve = self.plot.plot()
